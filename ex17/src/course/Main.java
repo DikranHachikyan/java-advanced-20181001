@@ -1,7 +1,7 @@
 package course;
 
 public class Main {
-
+    private static int z = 1;
     public static void main(String[] args) {
         int n = 5;
         
@@ -11,6 +11,7 @@ public class Main {
                 res *= i;
             }
             //n++; //Error!!
+            z++;
             return res;
         };
        
