@@ -9,7 +9,6 @@ public class Main {
        String s = "Lorem ipsum dolor sit amet, consectetur adipisicing elit.";
        byte [] buf = s.getBytes();
        boolean marked = false;
-       int i = 0;
        
        ByteArrayInputStream bin = new ByteArrayInputStream(buf);
        int c;
@@ -17,10 +16,10 @@ public class Main {
        while( (c = bin.read()) != -1){
            if( (char)c == 'a' && !marked){
                //System.out.println(i);
-               bin.mark(i);
+               bin.mark(0);
                marked = true;
            }
-           i++;
+
            System.out.print((char)c);
        }
        System.out.println();

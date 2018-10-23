@@ -23,7 +23,7 @@ public class Main {
            while( (c = car.read()) != -1){
                if( (char)c == '#'){
                    if( !marked ){
-                       car.mark(i);
+                       car.mark(0);
                        pos = i;
                    }
                    else{
