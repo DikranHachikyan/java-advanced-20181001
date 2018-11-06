@@ -28,11 +28,11 @@ public class Main {
         System.out.println("scheduled t2:");
 
         Runnable stopTask = ()->{
-          service.shutdown();
+          t2.cancel(true);
           System.out.println("Finished ...");
         };
         service.schedule(stopTask, 10, TimeUnit.SECONDS);
-        //t2.get();
+        
         System.out.println("delay:" + t2.getDelay(TimeUnit.SECONDS));
 
         System.out.println("end:");
@@ -40,6 +40,9 @@ public class Main {
        try{
            if(! service.awaitTermination(15, TimeUnit.SECONDS)){
               service.shutdownNow();
+              if(! service.awaitTermination(15, TimeUnit.SECONDS)){
+                  System.err.println("Service did not terminate");
+              }
               System.out.println("Service terminated");
           } 
        }
