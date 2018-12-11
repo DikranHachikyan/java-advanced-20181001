@@ -31,7 +31,7 @@ public class Main {
            while(true){
                //блокиращо чакане за канали готови да приемат операцията
                if( selector.select() <= 0) continue;
-               System.out.println("Process requests...");
+               //Process requests...
                processReadySet(selector.selectedKeys());
            }
            
@@ -55,10 +55,12 @@ public class Main {
             }
             
             if( key.isReadable()){
-                String message = processRead(key);
-                if( message.trim().length() > 0 ){
-                    processWrite(key, message);
-                }
+                processRead(key);
+                
+            }
+            
+            if( key.isValid() && key.isWritable()){
+                processWrite(key);
             }
         }//has next
        
@@ -73,15 +75,17 @@ public class Main {
         socket.configureBlocking(false);
         
         //регистрираме сокета за четене
-        socket.register( key.selector(),SelectionKey.OP_READ );
+        socket.register( key.selector(),SelectionKey.OP_READ |SelectionKey.OP_WRITE,
+                ByteBuffer.allocate(BUF_SIZE));
     }
 
-    private static String processRead(SelectionKey key) throws IOException {
+    private static void processRead(SelectionKey key) throws IOException {
         SocketChannel socket = (SocketChannel)key.channel();
-        ByteBuffer    buffer = ByteBuffer.allocate(BUF_SIZE);
-        
+        ByteBuffer    buffer = (ByteBuffer)key.attachment();
+        buffer.clear();
         int bytesCount = socket.read(buffer);
         String msg = "";
+        //System.out.println("bytes read:" + bytesCount);
         if( bytesCount > 0 ){
             buffer.flip();
             Charset         charset = Charset.forName("UTF-8");
@@ -89,15 +93,24 @@ public class Main {
             CharBuffer   charBuffer = decoder.decode(buffer);
             msg  = charBuffer.toString();
             System.out.println("Received:" + msg);
+            key.interestOps(SelectionKey.OP_WRITE);
         }
-        return msg;
+        else{
+            socket.shutdownInput();
+            socket.shutdownOutput();
+            
+        }
     }
 
-    private static void processWrite(SelectionKey key, String message) throws IOException {
+    private static void processWrite(SelectionKey key) throws IOException {
         SocketChannel socket = (SocketChannel)key.channel();
-        ByteBuffer    buffer = ByteBuffer.wrap(message.getBytes());
+        ByteBuffer    buffer = (ByteBuffer)key.attachment();
+        buffer.flip();
+        while(buffer.hasRemaining()){
+            socket.write(buffer);
+        }
         
-        socket.write(buffer);
+        key.interestOps(SelectionKey.OP_READ);
     }
    
 }
