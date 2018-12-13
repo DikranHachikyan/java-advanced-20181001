@@ -76,8 +76,15 @@ public class Main {
             
             if( key.isWritable() ){
                 String message = getUserInput();
-                if( message.equalsIgnoreCase("quit")) return true;//exit
-                processWrite(key, message);
+                if( message.equalsIgnoreCase("quit")){
+                    ((SocketChannel)key.channel()).shutdownInput();
+                    ((SocketChannel)key.channel()).shutdownOutput();
+                    key.cancel();
+                    return true;
+                }//exit
+                else{
+                    processWrite(key, message);
+                }
             }
         }
         return false;

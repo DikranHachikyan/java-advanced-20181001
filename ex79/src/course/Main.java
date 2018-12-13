@@ -30,7 +30,7 @@ public class Main {
            System.out.println("Waiting for connections...");
            while(true){
                //блокиращо чакане за канали готови да приемат операцията
-               if( selector.select() <= 0) continue;
+               if( selector.select() == 0) continue;
                //Process requests...
                processReadySet(selector.selectedKeys());
            }
@@ -75,7 +75,7 @@ public class Main {
         socket.configureBlocking(false);
         
         //регистрираме сокета за четене
-        socket.register( key.selector(),SelectionKey.OP_READ |SelectionKey.OP_WRITE,
+        socket.register( key.selector(),SelectionKey.OP_READ,
                 ByteBuffer.allocate(BUF_SIZE));
     }
 
@@ -85,7 +85,7 @@ public class Main {
         buffer.clear();
         int bytesCount = socket.read(buffer);
         String msg = "";
-        //System.out.println("bytes read:" + bytesCount);
+        System.out.println("bytes read:" + bytesCount);
         if( bytesCount > 0 ){
             buffer.flip();
             Charset         charset = Charset.forName("UTF-8");
@@ -93,11 +93,11 @@ public class Main {
             CharBuffer   charBuffer = decoder.decode(buffer);
             msg  = charBuffer.toString();
             System.out.println("Received:" + msg);
-            key.interestOps(SelectionKey.OP_WRITE);
+            key.interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
         }
         else{
-            socket.shutdownInput();
-            socket.shutdownOutput();
+            key.cancel();
+            socket.close();
             
         }
     }
