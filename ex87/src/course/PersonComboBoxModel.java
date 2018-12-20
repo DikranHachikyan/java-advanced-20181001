@@ -25,7 +25,7 @@ public class PersonComboBoxModel extends DefaultComboBoxModel<Person>{
     public void addElement(Person newPerson){
         int last = people.size() - 1;
         people.add( newPerson );
-        fireIntervalAdded(this, last - 1, last);
+        fireIntervalAdded(this, last, last);
     }
     
     @Override
